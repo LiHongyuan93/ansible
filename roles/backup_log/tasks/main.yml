@@ -1,0 +1,33 @@
+---
+
+# execute backup shell scripts to the backup type
+
+- name: Copy backup_daliy shell scripts
+  copy:
+    src: backup_daily_log.sh
+    dest: "{{ ansible_env.PWD }}"
+  when: backup_cycle == "daily"
+
+- name: Execute shell scripts
+  shell: sh backup_daily_log.sh
+  when: backup_cycle == "daily"
+
+- name: Copy backup weekly shell scripts
+  copy:
+    src: backup_weekly_log.sh
+    dest: "{{ ansible_env.PWD }}"
+  when: backup_cycle == "weekly"
+
+- name: Execute shell scripts
+  shell: sh backup_weekly_log.sh
+  when: backup_cycle == "weekly"
+
+- name: Copy backup monthly shell scripts
+  copy:
+    src: backup_monthly_log.sh
+    dest: "{{ ansible_env.PWD }}"
+  when: backup_cycle == "monthly"
+
+- name: Execute monthly shell scripts
+  shell: sh backup_monthly_log.sh
+  when: backup_cycle == "monthly"

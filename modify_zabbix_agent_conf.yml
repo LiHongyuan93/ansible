@@ -1,0 +1,23 @@
+---
+
+# This is a tmp scripts. Modify zabbix_agentd.conf file
+# parameters: none
+# How to use: 
+#     echo "[zabbix_agent]" >> environments/hosts
+#     echo "IP ansible_ssh_user=root ansible_ssh_pass=root_passwd ansible_ssh_port=ssh_ports" >> environments/hosts
+#     ansible-playbook modify_zabbix_agent_conf.yml
+
+
+- hosts: zabbix_agent
+  sudo: yes
+  gather_facts: false
+  tasks:
+    - name: Chage zabbix agent file
+      lineinfile:
+        dest: /etc/zabbix/zabbix_agentd.conf
+        state: present
+        line: 'StartAgents=1'
+        regexp: 'StartAgents=0'
+#        insertafter: '^# StartAgents=3'
+    - name: Restart zabbix agent
+      shell: systemctl restart zabbix-agent

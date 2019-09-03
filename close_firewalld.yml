@@ -1,0 +1,29 @@
+---
+
+## this playbooks aim to close offline linux machine firewalld
+# parameters: do not have
+# How to use:
+#     echo "[linux_machine]" >> environments/hosts
+#     echo "IP ansible_ssh_user=root ansible_ssh_pass=root_passwd ansible_ssh_port=ssh_ports" >> environments/hosts
+#     ansible-playbook close_firewalld.yml
+
+- hosts: linux_machine
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Check firewall status
+      shell: systemctl status firewalld
+      register: firewalld_exist
+      ignore_errors: True
+
+    - name: Stop firewalld
+      service:
+        name: firewalld
+        state: stopped
+      when: firewalld_exist | succeeded 
+
+    - name: Disable firewalld
+      service:
+        name: firewalld
+        enabled: no
+      when: firewalld_exist | succeeded 

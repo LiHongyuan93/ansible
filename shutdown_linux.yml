@@ -1,0 +1,8 @@
+---
+
+- hosts: "shutdown_machines"
+  become: yes
+  tasks:
+  - name: reboot linux
+    shell: 'sudo shutdown -h now'
+

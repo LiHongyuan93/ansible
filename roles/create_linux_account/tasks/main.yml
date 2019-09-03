@@ -1,0 +1,7 @@
+---
+
+- include_tasks: "create_user.yml"
+  when: ( user == "gymbodevop") or ( user == "gymbodb")
+
+- include_tasks: "create_admin.yml"
+  when: ( user == "gymboansible") or ( user == "gymboadmin")

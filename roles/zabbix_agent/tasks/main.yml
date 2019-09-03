@@ -1,0 +1,7 @@
+---
+
+- include_tasks: "offline.yml"
+  when: ( type == "offline")
+
+- include_tasks: "online.yml"
+  when: ( type == "online")

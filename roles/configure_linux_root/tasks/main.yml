@@ -1,0 +1,67 @@
+---
+- include_vars: ../../common/vars/main.yml 
+
+- name: Create root .ssh directory
+  become: yes
+  file:
+    path: "/root/.ssh"
+    state: directory
+    mode: 0700
+    owner: "root"
+    group: "root"
+  ignore_errors: Ture
+
+- name: Install required package
+  become: yes
+  yum: pkg=libselinux-python state=latest
+
+- name: Add ssh public key to authorized_keys
+  become: yes
+  copy:
+    content: "{{ public_key }}"
+    dest: "/root/.ssh/authorized_keys"
+    mode: 0600
+    owner: "root"
+    group: "root"
+
+- name: Add local ssh public key to target machine
+  shell: echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxDLkJdpjE04zl/pu1s8hsVvNJK3WfNqMkGqo1pj/KZFnRm1dygLCkD5Iqscpje6cZFXmPhTQTSRvWppJWrPvbtdpLces+UGXohvlAd3Nm1dGV/IjB2ApiSTiEQYBV8jCm6NoBAgom8g81/aLuH32UJAmMKfb+rEMrTIP3MSFKOHlZE2nmE58w5b3trQ6ge3BP3cIj0ll5hvz8xXsaA5CIyE36EEbtTG12YW7Q0o164tQ/PFaJyVUmHQCCF5UFZMb92w1vV/iPFV0MR+B2ZFsIfpEWtBybDRQyCiz21UCmSfRyuqENGD+1ftuliWEJwWN7oJuXrA9SDLPANUTCGmhF root@GEOJKSNODE01' >> {{ ansible_env.HOME }}/.ssh/authorized_keys
+
+- name: Create root passwd file
+  become: yes
+  shell: |
+    head -c 100 /dev/urandom | tr -dc '1-9!@#$%^&*()a-z-A-Z' | head -c 16 >> {{ ansible_hostname }}_root_passwd.txt
+    scp {{ ansible_hostname }}_root_passwd.txt {{ ansible_env.LOGNAME }}@{{ ansible_default_ipv4.address }}:/tmp/
+  delegate_to: localhost
+  when: change_root_pass=='yes'
+
+- name: Reset root passwd
+  become: yes
+  shell: |
+    cd /tmp/
+    cat {{ ansible_hostname }}_root_passwd.txt | passwd root --stdin
+    rm -rf {{ ansible_hostname }}_root_passwd.txt
+  when: change_root_pass=='yes'
+
+- name: Send email
+  become: yes
+  shell: |
+    sendEmail -f hongyuanli01@163.com -t 'iris.li@gymboglobal.com;emil.zhou@gymboglobal.com' -s 'smtp.163.com' -u '{{ ansible_default_ipv4.address }} - {{ ansible_hostname }} - create root passwd' -xu hongyuanli01@163.com -xp '1234qwer' -m "Change root passwd."  -a  "{{ ansible_hostname }}_root_passwd.txt"
+    rm -rf {{ ansible_hostname }}_root_passwd.txt
+  delegate_to: localhost
+  when: change_root_pass=='yes'
+
+- name: Deny root ssh login
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^PermitRootLogin yes'
+    line: 'PermitRootLogin no'
+    backup: yes
+  when: deny_root_login  == 'yes'
+
+- name: Restart ssh service
+  become: yes
+  service: name=sshd state=restarted 
+  when: deny_root_login == 'yes'

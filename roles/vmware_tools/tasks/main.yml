@@ -1,0 +1,28 @@
+---
+
+- name: Install dependency packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - perl
+    - gcc
+    - make
+    - kernel-headers
+    - kernel-devel
+    - libselinux-python
+
+- name: Copy vmware_tools package to path "/home/"
+  copy:
+    src: ../templates/VMwareTools10.tar.gz
+    dest: /home/VMwareTools10.tar.gz
+
+- name: Unzip tar package and install vmware_tools
+  unarchive: 
+    copy: no
+    src: /home/VMwareTools10.tar.gz
+    dest: /home/
+
+#- name: Install vmware tools
+#  shell: /home/vmware-tools-distrib/vmware-install.pl

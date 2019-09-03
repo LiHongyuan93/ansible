@@ -1,0 +1,13 @@
+---
+
+## This playbook aim to sync time to remote ntp server
+## How to run；
+##	echo 'sync_time' >> environments/hosts
+##	echo 'IP ansible_ssh_user=xxx' >> environments/hosts
+##	ansible-playbook deploy_ntp_sync_time.yml'
+
+- hosts: sync_time
+  gather_facts: no
+  become: yes
+  roles:
+    - ntp

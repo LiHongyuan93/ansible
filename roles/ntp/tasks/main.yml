@@ -1,0 +1,37 @@
+---
+
+- name: Verify whether service ntp installed or not
+  shell: systemctl status ntpd 
+  register: get_ntp_status
+  ignore_errors: true
+
+- name: Install ntp service 
+  yum: 
+    pkg: ntp 
+    state: latest
+  when: get_ntp_status|failed
+
+- name: Modify ntp.conf
+  template: 
+    src: ntp.conf 
+    dest: /etc/ntp.conf
+    backup: yes
+
+- name: Restart service ntp
+  service:
+    name: ntpd
+    state: restarted
+
+- name: Eable service ntp
+  service:
+    name: ntpd
+    enabled: yes
+
+- name: System lock sync to hardware lock
+  shell: hwclock --systohc
+
+- name: Modify time zone
+  shell: ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+- name: Symstem lock sync to remote ntp server
+  shell: timedatectl set-ntp true

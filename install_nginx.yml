@@ -1,0 +1,6 @@
+---
+
+- hosts: linux_machine
+  become: yes
+  roles:
+    - nginx

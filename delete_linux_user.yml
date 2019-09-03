@@ -1,0 +1,10 @@
+---
+
+# How to run: ansible-playbook -e target_host=IP_address -e user=username delete_linux_user.yml
+
+- hosts: "{{ target_host }}"
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: delete user
+    command: "userdel -r {{ user }}"

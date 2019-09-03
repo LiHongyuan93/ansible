@@ -1,0 +1,52 @@
+---
+
+- include_vars: ../../common/vars/main.yml
+
+- name: Create user group
+  become: yes
+  group:
+    name: "{{ user }}"
+    state: present
+
+- name: Create Linux account and added to "wheel" group
+  become: yes
+  user: "name={{ user }} group={{ user }} groups=wheel state=present"
+
+- name: Create passwd to user
+  become: yes
+  shell: echo {{ user_init_passwd }} | passwd {{ user }} --stdin
+  when: ( user == "gymbodevop") or ( user == "gymbodb")
+#  shell: |
+#    head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 8 > "{{ user }}"_passwd.txt
+#    more "{{ user }}"_passwd.txt
+#    cat "{{ user }}"_passwd.txt | passwd "{{ user }}" --stdin 
+#    rm -rf "{{ user }}"_passwd.txt
+
+- name: let user change init passwd when first login and expired every 3 month, and alert user to change the passwd three days in advance 
+  become: yes
+  shell: | 
+    chage -d 0 -M 90 -W 3 "{{ user }}"
+    chage -l "{{ user }}"
+
+- name: Install required package
+  become: yes
+  yum: pkg=libselinux-python state=latest
+
+- name: Add to NOPASSWD when user use sudo command
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "# %wheel        ALL=(ALL)       NOPASSWD: ALL"
+    line: "%wheel        ALL=(ALL)       NOPASSWD: ALL"
+    backup: yes
+
+#- name: If user input wrong passwd over 5 times, it will lock account 5 min
+#  become: yes
+
+#  lineinfile:
+#    dest: /etc/pam.d/password-auth
+#    state: present
+#    regexp: "auth        required        pam_tally.so onerr=fail deny=5 unlock_time=300"
+#    line: "auth        required        pam_tally.so onerr=fail deny=5 unlock_time=300"
+#    backup: yes

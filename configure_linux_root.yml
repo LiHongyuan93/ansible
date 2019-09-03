@@ -1,0 +1,16 @@
+---
+
+# This playbook is for auto modify root passwd and deny root ssh login function
+# Requirement:
+#     echo "[linux_machine]" >> environments/hosts
+#     echo "IP ansible_ssh_user=root ansible_ssh_pass=root_passwd ansible_ssh_port=ssh_ports" >> environments/hosts
+# How to run: 
+# 	ansible-playbook -e deny_root_login=yes/no -e change_root_pass=yes/no configure_linux_root.yml
+# 	or
+# 	ansible-playbook configure_linux_root.yml 	## default deny_root_login=no change_root_pass=no 
+
+- hosts: linux_machine
+  gather_facts: yes
+  remote_user: root
+  roles:
+  - configure_linux_root

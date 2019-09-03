@@ -1,0 +1,12 @@
+---
+
+# this playbook aim to backup log files(include system, application and docker) to special folder
+# used on offline Linux machine
+# Parameter: "backup_cycle"：daily weekly monthly
+# How to run: ansible-playbook -e backup_cycle=daily backup_log_file.yml
+
+- hosts: backup_log
+  become: yes
+  roles:
+    - backup_log
+

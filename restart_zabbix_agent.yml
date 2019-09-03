@@ -1,0 +1,15 @@
+---
+
+## This playbook is aim to restart zabbix agent
+## How to run
+## 	ansible-playbook restart_zabbix_agent.yml
+
+- hosts: zabbix_agent
+  sudo: yes
+  gather_facts: no
+  tasks:
+    - name: Restart zabbix agent
+      service: name=zabbix-agent state=restarted
+   
+    - name: Check zabbix agent status
+      shell: systemctl status zabbix-agent

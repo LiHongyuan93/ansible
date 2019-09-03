@@ -1,0 +1,84 @@
+---
+
+- include_vars: ../../common/vars/main.yml
+
+- name: Create user group
+  become: yes
+  group:
+    name: "{{ user }}"
+    state: present
+
+- name: Create Linux account and added to "wheel" group
+  become: yes
+  user: name="{{ user }}" group="{{ user }}" groups=wheel state=present
+
+- name: Create passwd to admin account
+  become: yes
+  shell: echo {{ gymboansible_passwd }} | passwd {{ user }} --stdin
+  when: user == "gymboansible"
+#  shell: |
+#    head -c 100 /dev/urandom | tr -dc 'a-z0-9A-Za-z0-9A-Z%^&*()' |head -c 16 > "{{ user }}"_passwd.txt
+#    more "{{ user }}"_passwd.txt
+#    cat "{{ user }}"_passwd.txt | passwd "{{ user }}" --stdin
+#    rm -rf "{{ user }}"_passwd.txt
+
+- name: Create passwd to admin account
+  become: yes
+  shell: echo {{ gymboadmin_passwd }} | passwd {{ user }} --stdin
+  when: user == "gymboadmin"
+
+- name: Install required package
+  become: yes
+  yum: pkg=libselinux-python state=latest
+
+- name: Add to NOPASSWD when user use sudo command
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: absent
+    regexp: "^%wheel        ALL=(ALL)       NOPASSWD: ALL"
+    backup: yes
+
+- name: Delete replicate lines in sudoers
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: "# %wheel        ALL=(ALL)       NOPASSWD: ALL"
+    line: "%wheel        ALL=(ALL)       NOPASSWD: ALL"
+
+- name: Create .ssh directory
+  become: yes
+  file:
+    path: "/home/{{ user }}/.ssh"
+    state: directory
+    mode: 0700
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+#- name: Install ssh private key to user
+#  become: yes
+#  copy:
+#    content: "{{ private_key }}"
+#    dest: "/home/{{ user }}/.ssh/id_rsa"
+#    mode: 0600
+#    owner: "{{ user }}"
+#    group: "{{ user }}"
+
+
+#- name: Install ssh public key to user
+#  become: yes
+#  copy:
+#    content: "{{ public_key }}"
+#    dest: "/home/{{ user }}/.ssh/id_rsa.pub"
+#    mode: 0644
+#    owner: "{{ user }}"
+#    group: "{{ user }}"
+
+- name: Add ssh public key to authorized_keys
+  become: yes
+  copy:
+    content: "{{ public_key }}"
+    dest: "/home/{{ user }}/.ssh/authorized_keys"
+    mode: 0600
+    owner: "{{ user }}"
+    group: "{{ user }}"

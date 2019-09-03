@@ -1,0 +1,15 @@
+---
+
+# This playbook aim to improve remote ssh login speed
+
+- hosts: linux_machine
+  become: yes
+  tasks:
+    - name: Modify sshd_config
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        state: present
+        line: 'UseDNS no'
+        backup: yes
+    - name: Restart sshd
+      service: name=sshd state=restarted

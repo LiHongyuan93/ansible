@@ -1,0 +1,35 @@
+--- 
+
+- name: Modify DNS configure file
+  template:
+    src: "resolv_online.conf"
+    dest: "/etc/resolv.conf"
+    backup: yes
+
+- name: Add hostname & ip in hosts
+  lineinfile:
+    dest: "/etc/hosts"
+    state: present
+    line: "{{ ansible_default_ipv4.address }} {{ ansible_hostname }}"
+    backup: yes
+
+- name: Yum install docker
+  shell: |
+    yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+    yum install -y yum-utils device-mapper-persistent-data lvm2
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    yum-config-manager --enable docker-ce-nightly
+    yum-config-manager --enable docker-ce-test
+    yum-config-manager --disable docker-ce-nightly
+    yum install -y docker-ce docker-ce-cli containerd.io
+
+- name: Start docker service 
+  service: name=docker state=started
+
+- name: Enable docker service
+  shell: systemctl enable docker 
+
+- name: edit crontab to clear docker images exist over 2 days
+  shell: |
+    echo "## Created by <iris.li@gymboglobal.com> to clear docker images exist over 2 days" >> /var/spool/cron/root
+    echo "0 5 * * * docker rmi \$(docker images | awk '\$5~/weeks/||/days/ {print \$3}') >> /tmp/cleaned_docker_image_log_list.txt" >> /var/spool/cron/root 

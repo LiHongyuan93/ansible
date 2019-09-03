@@ -1,0 +1,23 @@
+---
+## This playbook aim to deny selinux
+## How to run；
+##      echo 'linux_machine' >> environments/hosts
+##      echo 'IP ansible_ssh_user=xxx' >> environments/hosts
+##      ansible-playbook deny_selinx.yml
+
+- hosts: linux_machine
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Deny selinx temporary
+      shell: setenforce 0
+
+    - name: Install libselinux-python
+      yum: pkg=libselinux-python state=present
+
+    - name: Deny selinx permanent 
+      lineinfile:
+        dest: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: 'SELINUX=disabled'
+        backup: yes

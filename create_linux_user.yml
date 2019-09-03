@@ -1,0 +1,14 @@
+---
+
+# Create specific account/passwd; grant sudo admin priviledge;
+# parameters: <user>, include gymboadmin, gymbodevop, gymbodb, gymboansible
+# How to use: 
+#     echo "[linux_machine]" >> environments/hosts
+#     echo "IP ansible_ssh_user=root ansible_ssh_pass=root_passwd ansible_ssh_port=ssh_ports" >> environments/hosts
+#     ansible-playbook -e user="username" create_linux_user.yml
+
+- hosts: "linux_machine"
+  gather_facts: yes
+  remote_user: root
+  roles:
+  - create_linux_account

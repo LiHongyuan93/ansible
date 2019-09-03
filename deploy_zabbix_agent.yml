@@ -1,0 +1,16 @@
+---
+
+## This playbook aim to deploy zabbix_agent on offline target hosts.
+## Parameter: 
+##     {{ type }}	## just have two choice: online or offline
+## How to run:
+## 	echo "[zabbix_agent]" >> environments/hosts
+##      echo "IP ansible_ssh_user=xxx ansible_ssh_pass=xxx ansible_ssh_port=xxx" >> environments/hosts
+## 	ansible-playbook -e type=offline|online deploy_zabbix_agent.yml
+
+
+- hosts: zabbix_agent
+  gather_facts: yes
+  become: yes 
+  roles:
+    - zabbix_agent

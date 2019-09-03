@@ -1,0 +1,14 @@
+---
+
+## This script aim to configure docker rancher agent on new Linux machine on CentOS 7
+##    Install docker-ce, star docker and enable docker.service
+##    Modify Linux DNS configure file
+##    Add Linux localhost in hosts
+## Run docker agent command
+## Reference document: https://docs.docker.com/install/linux/docker-ce/centos/
+## How to run: ansible-playbook -e type=offline/online deploy_docker_machine.yml
+
+- hosts: linux_machine
+  become: yes
+  roles:
+    - docker

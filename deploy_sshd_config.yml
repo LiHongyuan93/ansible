@@ -1,0 +1,24 @@
+---
+
+# This ansible playbook aim to configure UseDNS to ssh login faster 
+# How to use:
+#     echo "[linux_machine]" >> environments/hosts
+#     echo "IP ansible_ssh_user=root ansible_ssh_pass=root_passwd ansible_ssh_port=ssh_ports" >> environments/hosts
+#     ansible-playbook deploy_sshd_config.yml
+
+- hosts: linux_machine
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Configure sshd_config file
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^#UseDNS'
+        line: 'UseDNS no'
+        backup: yes
+
+    - name: Restart service ssh
+      service:
+        name: sshd
+        state: restarted
+
